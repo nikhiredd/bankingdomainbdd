@@ -4,57 +4,70 @@ pipeline {
 
     environment {
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        PROJECT_DIR = "Desktop/banking domain"
     }
 
     stages {
 
         stage('Check Environment') {
             steps {
-                echo 'Checking Node.js and npm versions'
-                sh 'node --version'
-                sh 'npm --version'
+                dir("${PROJECT_DIR}") {
+                    echo 'Checking Node.js and npm versions'
+                    sh 'node --version'
+                    sh 'npm --version'
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing project dependencies'
-                sh '''
-                    if [ -f package-lock.json ]; then
-                        npm ci
-                    else
-                        npm install
-                    fi
-                '''
+                dir("${PROJECT_DIR}") {
+                    echo 'Installing project dependencies'
+                    sh '''
+                        if [ -f package-lock.json ]; then
+                            npm ci
+                        else
+                            npm install
+                        fi
+                    '''
+                }
             }
         }
 
         stage('Install Playwright Browser') {
             steps {
-                echo 'Installing Chromium browser'
-                sh 'npx playwright install chromium'
+                dir("${PROJECT_DIR}") {
+                    echo 'Installing Chromium browser'
+                    sh 'npx playwright install chromium'
+                }
             }
         }
 
         stage('Generate BDD Tests') {
             steps {
-                echo 'Generating tests from feature files'
-                sh 'npx bddgen'
+                dir("${PROJECT_DIR}") {
+                    echo 'Generating tests from feature files'
+                    sh 'npx bddgen'
+                }
             }
         }
 
         stage('Run Playwright Tests') {
             steps {
-                echo 'Executing Playwright BDD tests'
-                sh 'npx playwright test'
+                dir("${PROJECT_DIR}") {
+                    echo 'Executing Playwright BDD tests'
+                    sh 'npx playwright test'
+                }
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: 'playwright-report/**,test-results/**',
-                             allowEmptyArchive: true
+            dir("${PROJECT_DIR}") {
+                archiveArtifacts artifacts: 'playwright-report/**,test-results/**',
+                                 allowEmptyArchive: true
+            }
         }
 
         success {
@@ -66,3 +79,4 @@ pipeline {
         }
     }
 }
+
