@@ -1,74 +1,65 @@
 pipeline {
     agent any
 
+    parameters {
+        string(
+            name: 'FEATURE_FILE',
+            defaultValue: 'login',
+            description: 'Feature file name without extension'
+        )
+    }
+
     environment {
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        PROJECT_DIR = "Desktop/banking domain"
+        PROJECT_DIR = "${WORKSPACE}"
     }
 
     stages {
 
         stage('Check Environment') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo 'Checking Node.js and npm versions'
-                    sh 'node --version'
-                    sh 'npm --version'
-                }
+                sh 'node --version'
+                sh 'npm --version'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo 'Installing project dependencies'
-                    sh '''
-                        if [ -f package-lock.json ]; then
-                            npm ci
-                        else
-                            npm install
-                        fi
-                    '''
-                }
+                sh '''
+                    if [ -f package-lock.json ]; then
+                        npm ci
+                    else
+                        npm install
+                    fi
+                '''
             }
         }
 
         stage('Install Playwright Browser') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo 'Installing Chromium browser'
-                    sh 'npx playwright install chromium'
-                }
+                sh 'npx playwright install chromium'
             }
         }
 
         stage('Generate BDD Tests') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo 'Generating tests from feature files'
-                    sh 'npx bddgen'
-                }
+                sh 'npx bddgen'
             }
         }
 
         stage('Run Playwright Tests') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo "Running feature: ${params.FEATURE_FILE}"
-                    sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
-                }
+                sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
             }
         }
     }
 
     post {
         always {
-            dir("${PROJECT_DIR}") {
-                archiveArtifacts(
-                    artifacts: 'playwright-report/**,test-results/**',
-                    allowEmptyArchive: true
-                )
-            }
+            archiveArtifacts(
+                artifacts: 'playwright-report/**,test-results/**',
+                allowEmptyArchive: true
+            )
         }
 
         success {
@@ -80,3 +71,4 @@ pipeline {
         }
     }
 }
+ 
