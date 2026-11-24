@@ -1,17 +1,17 @@
+
 pipeline {
     agent any
 
     parameters {
-        string(
+        choice(
             name: 'FEATURE_FILE',
-            defaultValue: 'login',
-            description: 'Feature file name without extension'
+            choices: ['login', 'transferFunds', 'billPay'],
+            description: 'Select the feature file to execute'
         )
     }
 
     environment {
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        PROJECT_DIR = "${WORKSPACE}"
     }
 
     stages {
@@ -49,6 +49,7 @@ pipeline {
 
         stage('Run Playwright Tests') {
             steps {
+                echo "Running feature: ${params.FEATURE_FILE}"
                 sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
             }
         }
@@ -63,7 +64,7 @@ pipeline {
         }
 
         success {
-            echo 'All Playwright BDD tests completed successfully!'
+            echo 'Playwright BDD tests completed successfully!'
         }
 
         failure {
@@ -71,4 +72,5 @@ pipeline {
         }
     }
 }
+
  
