@@ -54,12 +54,11 @@ pipeline {
 
         stage('Run Playwright Tests') {
              steps {
-                    dir("${PROJECT_DIR}") {
-                    echo "Running feature: ${params.FEATURE_FILE}"
-                    sh 'npx playwright test --grep-invert "DO_NOT_MATCH"'
-                    sh "npx playwright test --grep @billpay"
-                   
-                }   
+                   dir("${PROJECT_DIR}") {
+                   echo "Running feature: ${params.FEATURE_FILE}"
+                   sh 'npx playwright test --grep-invert "DO_NOT_MATCH"'
+                   sh "npx playwright test --grep @billpay"
+                }
             }
         }
             
