@@ -53,16 +53,17 @@ pipeline {
         }
 
         stage('Run Playwright Tests') {
-            steps {
-                dir("${PROJECT_DIR}") {
-                    echo 'Executing Playwright BDD tests'
-                    sh 'npx playwright test'
+              steps {
+                    dir("${PROJECT_DIR}") {
+                    echo "Running feature: ${params.FEATURE_FILE}"
+                    sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
                 }
             }
-        }
-    }
-
-    post {
+     }
+            
+        
+    
+ post {
         always {
             dir("${PROJECT_DIR}") {
                 archiveArtifacts artifacts: 'playwright-report/**,test-results/**',
@@ -78,5 +79,5 @@ pipeline {
             echo 'Playwright BDD execution failed. Check Console Output.'
         }
     }
-}
+
 
