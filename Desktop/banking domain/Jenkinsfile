@@ -12,55 +12,71 @@ pipeline {
 
     environment {
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        PROJECT_DIR = "Desktop/banking domain"
     }
 
     stages {
 
         stage('Check Environment') {
             steps {
-                sh 'node --version'
-                sh 'npm --version'
+                dir("${PROJECT_DIR}") {
+                    sh 'node --version'
+                    sh 'npm --version'
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    if [ -f package-lock.json ]; then
-                        npm ci
-                    else
-                        npm install
-                    fi
-                '''
+                dir("${PROJECT_DIR}") {
+                    sh '''
+                        if [ -f package-lock.json ]; then
+                            npm ci
+                        else
+                            npm install
+                        fi
+                    '''
+                }
             }
         }
 
         stage('Install Playwright Browser') {
             steps {
-                sh 'npx playwright install chromium'
+                dir("${PROJECT_DIR}") {
+                    sh 'npx playwright install chromium'
+                }
             }
         }
 
         stage('Generate BDD Tests') {
             steps {
-                sh 'npx bddgen'
+                dir("${PROJECT_DIR}") {
+                    echo 'Generating BDD tests'
+                    sh 'npx bddgen'
+                    sh 'pwd'
+                    sh 'find .features-gen -type f'
+                }
             }
         }
 
         stage('Run Playwright Tests') {
             steps {
-                echo "Running feature: ${params.FEATURE_FILE}"
-                sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
+                dir("${PROJECT_DIR}") {
+                    echo "Running feature: ${params.FEATURE_FILE}"
+                    sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
+                }
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts(
-                artifacts: 'playwright-report/**,test-results/**',
-                allowEmptyArchive: true
-            )
+            dir("${PROJECT_DIR}") {
+                archiveArtifacts(
+                    artifacts: 'playwright-report/**,test-results/**',
+                    allowEmptyArchive: true
+                )
+            }
         }
 
         success {
@@ -73,4 +89,3 @@ pipeline {
     }
 }
 
- 
