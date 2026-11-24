@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -53,21 +52,24 @@ pipeline {
         }
 
         stage('Run Playwright Tests') {
-              steps {
-                    dir("${PROJECT_DIR}") {
+            steps {
+                dir("${PROJECT_DIR}") {
                     echo "Running feature: ${params.FEATURE_FILE}"
                     sh "npx playwright test .features-gen/features/${params.FEATURE_FILE}.feature.spec.js"
                 }
             }
-     }
-            
-        
-    
- post {
+        }
+
+    }  // stages closed here
+
+    post {
+
         always {
             dir("${PROJECT_DIR}") {
-                archiveArtifacts artifacts: 'playwright-report/**,test-results/**',
-                                 allowEmptyArchive: true
+                archiveArtifacts(
+                    artifacts: 'playwright-report/**,test-results/**',
+                    allowEmptyArchive: true
+                )
             }
         }
 
@@ -80,5 +82,4 @@ pipeline {
         }
     }
 
-
-    }
+} 
