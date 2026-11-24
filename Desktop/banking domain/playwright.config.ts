@@ -8,7 +8,15 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
   testDir,
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+  ],
+
+  
   use: {
+    screenshot:'on',
+    video:'on',
     browserName: 'chromium',
     headless: false,
   },
