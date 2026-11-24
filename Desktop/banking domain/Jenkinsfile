@@ -59,11 +59,9 @@ pipeline {
                 }
             }
         }
-
-    }  // stages closed here
+    }
 
     post {
-
         always {
             dir("${PROJECT_DIR}") {
                 archiveArtifacts(
@@ -81,5 +79,4 @@ pipeline {
             echo 'Playwright BDD execution failed. Check Console Output.'
         }
     }
-
-} 
+}
